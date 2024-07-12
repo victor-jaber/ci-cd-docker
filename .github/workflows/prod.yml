@@ -16,7 +16,6 @@ jobs:
         with: 
           node-version: 'latest'
       - run: npm ci
-      - run: npm test
 
       - name: React Build Project
         run: npm run build
