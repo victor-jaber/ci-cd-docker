@@ -29,10 +29,10 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Build Docker Image
-        run: docker build -t victorrippi/ghactions .
+        run: cd my-app && docker build -t victorrippi/ghactions .
 
       - name: Push Docker Image
-        run: docker push victorrippi/ghactions
+        run: cd my-app && docker push victorrippi/ghactions
 
   deploy:
     needs: build
