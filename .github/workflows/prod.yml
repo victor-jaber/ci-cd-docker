@@ -45,13 +45,13 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Remove Old Docker 
-        run: docker rm -f deploy_ghactions
+        run: sudo docker rm -f deploy_ghactions
 
       - name: Remove All Not Used Images
-        run: docker system prune -a -f 
+        run: sudo docker system prune -a -f 
 
       - name: Pull Image From DockerHub to EC2 Instance
-        run: docker pull victorrippi/ghactions 
+        run: sudo docker pull victorrippi/ghactions 
 
       - name: Run Docker Container
-        run: docker run -d -p 5173:5173 --name deploy_ghactions victorrippi/ghactions
+        run: sudo docker run -d -p 3000:3000 --name deploy_ghactions victorrippi/ghactions
