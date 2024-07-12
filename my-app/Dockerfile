@@ -1,29 +1,27 @@
-# Etapa de construção
-FROM node:14-alpine as build
+# Use a imagem base oficial do Node.js
+FROM node:22-alpine
 
 # Defina o diretório de trabalho no contêiner
 WORKDIR /app
 
-# Copie o package.json e o package-lock.json
-COPY package*.json ./
+# Copie o arquivo package.json e package-lock.json
+COPY package.json package-lock.json ./
 
 # Instale as dependências
 RUN npm install
 
-# Copie todo o código da aplicação para o diretório de trabalho
+# Limpe o cache do npm
+RUN npm cache clean --force
+
+# Copie todos os arquivos do projeto para o diretório de trabalho
 COPY . .
 
-# Construa a aplicação para produção
+# Construa o aplicativo para produção
 RUN npm run build
 
-# Etapa de produção
-FROM nginx:alpine
-
-# Copie os arquivos de build do estágio anterior para o diretório NGINX
-COPY --from=build /app/build /usr/share/nginx/html
-
-# Exponha a porta em que o NGINX está ouvindo
+# Exponha a porta na qual a aplicação irá rodar
 EXPOSE 3000
 
-# Comando para rodar o NGINX
-CMD ["nginx", "-g", "daemon off;"]
+# Comando para iniciar a aplicação
+CMD ["npm", "run", "preview", "--", "--port", "3000", "--host"]
+
