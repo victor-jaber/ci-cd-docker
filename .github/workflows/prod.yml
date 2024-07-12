@@ -15,10 +15,12 @@ jobs:
         uses: actions/setup-node@v4
         with: 
           node-version: 'latest'
-      - run: npm ci
+
+      - name: Install Dependencies
+        run: cd my-app && npm ci
 
       - name: React Build Project
-        run: npm run build
+        run: cd my-app && npm run build
 
       - name: Login to DockerHub
         uses: docker/login-action@v3
@@ -43,7 +45,7 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Remove Old Docker 
-        run:  docker rm -f deploy_ghactions
+        run: docker rm -f deploy_ghactions
 
       - name: Remove All Not Used Images
         run: docker system prune -a -f 
@@ -53,7 +55,3 @@ jobs:
 
       - name: Run Docker Container
         run: docker run -d -p 5173:5173 --name deploy_ghactions victorrippi/ghactions
-
-
-
-
