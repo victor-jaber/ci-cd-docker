@@ -45,11 +45,11 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Copy docker-compose file to EC2
-        run: scp -i ${{ secrets.EC2_SSH_KEY }} docker-compose.yml ec2-user@${{ secrets.EC2_INSTANCE }}:/home/ec2-user/docker-compose.yml
+        run: scp -i ${{ secrets.EC2_SSH_KEY }} docker-compose.yml ubuntu@${{ secrets.EC2_INSTANCE }}:/home/ubuntu/docker-compose.yml
 
       - name: SSH into EC2 and Deploy
         run: |
-          ssh -i ${{ secrets.EC2_SSH_KEY }} ec2-user@${{ secrets.EC2_INSTANCE }} << 'EOF'
+          ssh -i ${{ secrets.EC2_SSH_KEY }} ubuntu@${{ secrets.EC2_INSTANCE }} << 'EOF'
           sudo docker-compose down
           sudo docker-compose pull
           sudo docker-compose up -d
