@@ -44,14 +44,13 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Remove Old Docker 
-        run: sudo docker rm -f deploy_ghactions
+      - name: Copy docker-compose file to EC2
+        run: scp -i ${{ secrets.EC2_SSH_KEY }} docker-compose.yml ec2-user@${{ secrets.EC2_INSTANCE }}:/home/ec2-user/docker-compose.yml
 
-      - name: Remove All Not Used Images
-        run: sudo docker system prune -a -f 
-
-      - name: Pull Image From DockerHub to EC2 Instance
-        run: sudo docker pull victorrippi/ghactions 
-
-      - name: Run Docker Container
-        run: sudo docker run -d -p 3000:3000 --name deploy_ghactions victorrippi/ghactions
+      - name: SSH into EC2 and Deploy
+        run: |
+          ssh -i ${{ secrets.EC2_SSH_KEY }} ec2-user@${{ secrets.EC2_INSTANCE }} << 'EOF'
+          sudo docker-compose down
+          sudo docker-compose pull
+          sudo docker-compose up -d
+          EOF
