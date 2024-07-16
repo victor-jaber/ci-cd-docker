@@ -55,7 +55,7 @@ jobs:
       - name: SSH into EC2 and Deploy with Docker Swarm
         run: |
           ssh -o StrictHostKeyChecking=no -i key.pem ubuntu@${{ secrets.EC2_INSTANCE }} << 'EOF'
-          docker swarm init || true
-          docker network create --driver overlay webnet || true
-          docker stack deploy -c /home/ubuntu/docker-compose.yml myapp
+          sudo docker swarm init || true
+          sudo docker network create --driver overlay webnet || true
+          sudo docker stack deploy -c /home/ubuntu/docker-compose.yml myapp
           EOF
