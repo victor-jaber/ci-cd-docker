@@ -49,10 +49,13 @@ jobs:
       - name: Copy docker-compose file to EC2
         run: scp -o StrictHostKeyChecking=no -i key.pem docker-compose.yml ubuntu@${{ secrets.EC2_INSTANCE }}:/home/ubuntu/docker-compose.yml
 
-      - name: SSH into EC2 and Deploy
+      - name: Copy Nginx config file to EC2
+        run: scp -o StrictHostKeyChecking=no -i key.pem nginx.conf ubuntu@${{ secrets.EC2_INSTANCE }}:/home/ubuntu/nginx.conf
+
+      - name: SSH into EC2 and Deploy with Docker Swarm
         run: |
           ssh -o StrictHostKeyChecking=no -i key.pem ubuntu@${{ secrets.EC2_INSTANCE }} << 'EOF'
-          sudo docker compose down
-          sudo docker compose pull
-          sudo docker compose up -d
+          docker swarm init || true
+          docker network create --driver overlay webnet || true
+          docker stack deploy -c /home/ubuntu/docker-compose.yml myapp
           EOF
