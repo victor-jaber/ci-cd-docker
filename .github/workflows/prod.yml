@@ -47,15 +47,18 @@ jobs:
           chmod 600 key.pem
 
       - name: Copy docker-compose file to EC2
-        run: scp -o StrictHostKeyChecking=no -i key.pem docker-compose.yml ubuntu@${{ secrets.EC2_INSTANCE }}:/home/ubuntu/docker-compose.yml
+        run: scp -o StrictHostKeyChecking=no -i key.pem my-app/docker-compose.yml ubuntu@${{ secrets.EC2_INSTANCE }}:/home/ubuntu/docker-compose.yml
 
       - name: Copy Nginx config file to EC2
-        run: scp -o StrictHostKeyChecking=no -i key.pem nginx.conf ubuntu@${{ secrets.EC2_INSTANCE }}:/home/ubuntu/nginx.conf
+        run: scp -o StrictHostKeyChecking=no -i key.pem my-app/nginx.conf ubuntu@${{ secrets.EC2_INSTANCE }}:/home/ubuntu/nginx.conf
 
       - name: SSH into EC2 and Deploy with Docker Swarm
         run: |
           ssh -o StrictHostKeyChecking=no -i key.pem ubuntu@${{ secrets.EC2_INSTANCE }} << 'EOF'
-          sudo docker swarm init || true
+          sudo docker swarm init --advertise-addr $(hostname -I | awk '{print $1}') || true
           sudo docker network create --driver overlay webnet || true
           sudo docker stack deploy -c /home/ubuntu/docker-compose.yml myapp
           EOF
+
+      - name: Clean Up Docker Images
+        run: ssh -o StrictHostKeyChecking=no -i key.pem ubuntu@${{ secrets.EC2_INSTANCE }} "sudo docker system prune -a"
