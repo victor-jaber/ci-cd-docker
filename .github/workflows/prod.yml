@@ -61,4 +61,5 @@ jobs:
           EOF
 
       - name: Clean Up Docker Images
-        run: ssh -o StrictHostKeyChecking=no -i key.pem ubuntu@${{ secrets.EC2_INSTANCE }} "sudo docker system prune -a"
+        run: ssh -o StrictHostKeyChecking=no -i key.pem ubuntu@${{ secrets.EC2_INSTANCE }} "sudo docker system prune -a -f"
+
