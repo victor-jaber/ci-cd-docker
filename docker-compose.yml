@@ -4,7 +4,6 @@ services:
   frontend:
     image: victorrippi/ghactions:latest
     deploy:
-      replicas: 3
       update_config:
         parallelism: 2
         delay: 10s
@@ -22,7 +21,6 @@ services:
     depends_on:
       - frontend
     deploy:
-      replicas: 1
       update_config:
         parallelism: 1
         delay: 10s
