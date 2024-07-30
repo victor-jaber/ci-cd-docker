@@ -1,25 +1,25 @@
-name: Deploy Application
+name: Deploy React Application
 
 on: 
   push:
     branches: [main]
 
 jobs:
-  build: 
+  build:
     runs-on: ubuntu-latest
-    steps: 
+    steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup React Application
+      - name: Setup Node.js
         uses: actions/setup-node@v4
-        with: 
+        with:
           node-version: 'latest'
 
       - name: Install Dependencies
         run: cd my-app && npm ci
 
-      - name: React Build Project
+      - name: Build React Application
         run: cd my-app && npm run build
 
       - name: Login to DockerHub
@@ -32,34 +32,25 @@ jobs:
         run: cd my-app && docker build -t victorrippi/ghactions .
 
       - name: Push Docker Image
-        run: cd my-app && docker push victorrippi/ghactions
+        run: docker push victorrippi/ghactions
 
   deploy:
     needs: build
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
       - name: Setup SSH key
         run: |
-          echo "${{ secrets.EC2_SSH_KEY }}" > key.pem
+          echo "${{ secrets.SSH_KEY }}" > key.pem
           chmod 600 key.pem
 
-      - name: Copy docker-compose file to EC2
-        run: scp -o StrictHostKeyChecking=no -i key.pem docker-compose.yml ubuntu@${{ secrets.EC2_INSTANCE }}:/home/cicd/docker-compose.yml
-
-      - name: Copy Nginx config file to EC2
-        run: scp -o StrictHostKeyChecking=no -i key.pem nginx.conf ubuntu@${{ secrets.EC2_INSTANCE }}:/home/cicd/nginx.conf
-
-      - name: SSH into EC2 and Deploy with Docker Swarm
+      - name: Deploy and Run Docker Container
         run: |
-          ssh -o StrictHostKeyChecking=no -i key.pem ubuntu@${{ secrets.EC2_INSTANCE }} << 'EOF'
-          sudo docker swarm init --advertise-addr $(hostname -I | awk '{print $1}') || true
-          sudo docker network create --driver overlay webnet || true
-          sudo docker stack deploy -c /home/ubuntu/docker-compose.yml myapp
+          ssh -o StrictHostKeyChecking=no -i key.pem ubuntu@${{ secrets.SERVER_IP }} << 'EOF'
+          docker pull victorrippi/ghactions
+          docker stop myapp || true
+          docker rm myapp || true
+          docker run -d -p 3000:3000 --name myapp victorrippi/ghactions
           EOF
-
-      - name: Clean Up Docker Images
-        run: ssh -o StrictHostKeyChecking=no -i key.pem ubuntu@${{ secrets.EC2_INSTANCE }} "sudo docker system prune -a -f"
-
