@@ -43,12 +43,12 @@ jobs:
 
       - name: Setup SSH key
         run: |
-          echo "${{ secrets.SSH_KEY }}" > key.pem
+          echo "${{ secrets.EC2_SSH_KEY }}" > key.pem
           chmod 600 key.pem
 
       - name: Deploy and Run Docker Container
         run: |
-          ssh -o StrictHostKeyChecking=no -i key.pem ubuntu@${{ secrets.SERVER_IP }} << 'EOF'
+          ssh -o StrictHostKeyChecking=no -i key.pem ubuntu@${{ secrets.EC2_INSTANCE }} << 'EOF'
           docker pull victorrippi/ghactions
           docker stop myapp || true
           docker rm myapp || true
