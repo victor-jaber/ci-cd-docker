@@ -53,9 +53,6 @@ jobs:
           docker stop myapp || true
           docker rm myapp || true
           docker run -d -p 3000:3000 --name myapp victorrippi/ghactions
-          EOF
-
-      - name: Cleaning Old System 
-        run: |
           docker system prune -a -f
           docker image prune -a -f
+          EOF
