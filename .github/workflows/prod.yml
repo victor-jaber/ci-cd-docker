@@ -56,6 +56,6 @@ jobs:
           EOF
 
       - name: Cleaning Old System 
-        run: docker system prune -a -f
-             docker image prune -a -f
-
+        run: |
+          docker system prune -a -f
+          docker image prune -a -f
